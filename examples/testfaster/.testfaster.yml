@@ -1,0 +1,69 @@
+name: Seldon-Core - Combinator Component
+base:
+  kernel_image: quay.io/testfaster/ignite-kernel
+  os_dockerfile: |-
+    # This dockerfile defines the base disk image for your VMs
+    FROM quay.io/testfaster/kube-ubuntu
+    RUN apt update
+    RUN apt install gnupg2 software-properties-common rsync -y
+    RUN curl -fsSL https://apt.releases.hashicorp.com/gpg | apt-key add -
+    RUN apt-add-repository "deb [arch=$(dpkg --print-architecture)] https://apt.releases.hashicorp.com $(lsb_release -cs) main"
+    RUN apt install terraform -y
+
+  preload_docker_images:
+    # Needed after initial startup
+    - alpine:latest
+    - gcr.io/k8s-minikube/storage-provisioner:v1.8.1
+    - k8s.gcr.io/coredns:1.6.5
+    - k8s.gcr.io/etcd:3.4.3-0
+    - k8s.gcr.io/kube-apiserver:v1.17.11
+    - k8s.gcr.io/kube-controller-manager:v1.17.11
+    - k8s.gcr.io/kube-proxy:v1.17.11
+    - k8s.gcr.io/kube-scheduler:v1.17.11
+    - k8s.gcr.io/pause:3.1
+    # NB: use:
+    #     testctl ssh --tty=false -- docker images --format "{{.Repository}}:{{.Tag}}" |sort |sed 's/^/    - /g'
+    # and then remove ':<none>' tags
+    # to refresh this list
+
+
+  prewarm_script: |-
+    # This gets run after each individual VM starts up, so
+    # start services you need in your tests here and they'll be
+    # already running when you testctl get
+    #!/bin/bash
+    set -euo pipefail
+    git clone https://github.com/combinator-ml/terraform-k8s-pachyderm repo
+    cd repo
+    git checkout 332e6f7bdba13df1663ce877704dcb642c93c3fa
+    cd examples/testfaster
+    terraform init
+    KUBE_CONFIG_PATH=~/.kube/config terraform apply -auto-approve
+
+  # Need kube 1.17 for kubeflow last time I checked (1.18 doesn't work).
+  # https://github.com/kubeflow/kubeflow/issues/5246#issuecomment-682013220
+  kubernetes_version: v1.17.11
+runtime:
+  cpus: 8
+  memory: 16GB
+  disk: 50GB
+# How many ready VMs to keep running for instant testctl get
+prewarm_pool_size: 2
+# Upper bound for pool size, e.g. to keep memory usage sensible
+max_pool_size: 16
+# Timeout VMs after this long. Set to "" if you want to use
+# the VMs for long running development purposes rather than
+# short-lived CI.
+default_lease_timeout: "1h"
+pool_sleep_timeout: "7d"
+shared: true
+
+launch:
+  title: Seldon-Core
+  buttons:
+    - title: Launch Jupyter
+      port: 30600
+  homepage: |
+    # Quick Start Seldon-Core
+
+    Click the Jupyter link to the left and launch the `demo.ipynb` notebook.
