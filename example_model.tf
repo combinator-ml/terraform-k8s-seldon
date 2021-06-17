@@ -1,6 +1,6 @@
 resource "kubernetes_namespace" "seldon" {
   metadata {
-    name = "seldon"
+    name = "seldon" # TODO: factor
   }
 
   depends_on = [
@@ -8,33 +8,18 @@ resource "kubernetes_namespace" "seldon" {
   ]
 }
 
-resource "kubernetes_manifest" "iris_model" {
-  provider = kubernetes-alpha
+# This currently doesn't work due to https://github.com/SeldonIO/seldon-core/issues/3305
 
-  manifest = {
-    "apiVersion" = "machinelearning.seldon.io/v1"
-    "kind"       = "SeldonDeployment"
-    "metadata" = {
-      "name"      = "iris-model"
-      "namespace" = "seldon"
-    }
-    "spec" = {
-      "name" = "iris"
-      "predictors" = [
-        {
-          "graph" = {
-            "implementation" = "SKLEARN_SERVER"
-            "modelUri"       = "gs://seldon-models/sklearn/iris"
-            "name"           = "classifier"
-          }
-          "name"     = "default"
-          "replicas" = 1
-        }
-      ]
-    }
-  }
+# data "kubectl_file_documents" "seldon_deployment_manifest" {
+#   content = file("${path.module}/seldon_deployment.yaml")
+# }
 
-  depends_on = [
-    kubernetes_namespace.seldon
-  ]
-}
+# resource "kubectl_manifest" "seldon_deployment" {
+#   count              = var.enable_example_seldon_deployment ? length(data.kubectl_file_documents.seldon_deployment_manifest.documents) : 0
+#   yaml_body          = element(data.kubectl_file_documents.seldon_deployment_manifest.documents, count.index)
+#   override_namespace = "seldon"
+#   depends_on = [
+#     helm_release.seldon_core_operator,
+#     kubernetes_namespace.seldon
+#   ]
+# }

@@ -2,7 +2,7 @@ locals {
   seldon_helm_values = {
     istio = {
       enabled = true
-      gateway = "istio-system/seldon-gateway"
+      gateway = "istio-system/seldon-gateway" # todo: factor
     }
   }
 }
