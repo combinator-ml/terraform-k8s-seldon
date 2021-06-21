@@ -1,6 +1,5 @@
 module "istio" {
-  #   source  = "combinator-ml/istio/k8s"
-  source = "../terraform-k8s-istio"
+  source = "combinator-ml/istio/k8s"
 }
 
 data "kubectl_file_documents" "gateway_manifest" {
