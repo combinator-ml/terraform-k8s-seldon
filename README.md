@@ -24,7 +24,7 @@ Once the component has launched, click on the Jupyter link. Feast does not have 
 
 ### Example Notebook
 
-Once inside Jupyter, browse to the demo notebook, which comes from the [official quick start guide](https://docs.seldon.io/projects/seldon-core/en/v1.1.0/workflow/quickstart.html). Follow the instructions in the notebook.
+Once inside Jupyter, browse to the demo notebook, which comes from the [official quick start guide](https://docs.seldon.io/projects/seldon-core/en/v1.1.0/workflow/quickstart.html). Follow the instructions in the notebook to deploy a pre-trained model.
 
 ## Usage
 
