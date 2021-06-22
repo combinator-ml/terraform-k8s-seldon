@@ -1,4 +1,4 @@
-name: Seldon-Core - Combinator Component
+name: Seldon - Combinator Component
 base:
   kernel_image: quay.io/testfaster/ignite-kernel
   os_dockerfile: |-
@@ -11,16 +11,28 @@ base:
     RUN apt install terraform -y
 
   preload_docker_images:
-    # Needed after initial startup
     - alpine:latest
+    - gcr.io/istio-testing/pilot:latest
+    - gcr.io/istio-testing/proxyv2:latest
     - gcr.io/k8s-minikube/storage-provisioner:v1.8.1
+    - jupyter/scipy-notebook:python-3.9.2
     - k8s.gcr.io/coredns:1.6.5
+    - k8s.gcr.io/coredns:1.6.7
     - k8s.gcr.io/etcd:3.4.3-0
     - k8s.gcr.io/kube-apiserver:v1.17.11
+    - k8s.gcr.io/kube-apiserver:v1.18.3
     - k8s.gcr.io/kube-controller-manager:v1.17.11
+    - k8s.gcr.io/kube-controller-manager:v1.18.3
     - k8s.gcr.io/kube-proxy:v1.17.11
+    - k8s.gcr.io/kube-proxy:v1.18.3
     - k8s.gcr.io/kube-scheduler:v1.17.11
+    - k8s.gcr.io/kube-scheduler:v1.18.3
     - k8s.gcr.io/pause:3.1
+    - k8s.gcr.io/pause:3.2
+    - seldonio/rclone-storage-initializer:1.9.0
+    - seldonio/seldon-core-executor:1.9.0
+    - seldonio/seldon-core-operator:1.9.0
+    - seldonio/sklearnserver:1.9.0
     # NB: use:
     #     testctl ssh --tty=false -- docker images --format "{{.Repository}}:{{.Tag}}" |sort |sed 's/^/    - /g'
     # and then remove ':<none>' tags
@@ -33,16 +45,14 @@ base:
     # already running when you testctl get
     #!/bin/bash
     set -euo pipefail
-    git clone https://github.com/combinator-ml/terraform-k8s-pachyderm repo
+    git clone https://github.com/combinator-ml/terraform-k8s-seldon repo
     cd repo
-    git checkout 332e6f7bdba13df1663ce877704dcb642c93c3fa
+    git checkout 7bcd316747629b783849008f2ec2ad47ecda7549
     cd examples/testfaster
     terraform init
     KUBE_CONFIG_PATH=~/.kube/config terraform apply -auto-approve
 
-  # Need kube 1.17 for kubeflow last time I checked (1.18 doesn't work).
-  # https://github.com/kubeflow/kubeflow/issues/5246#issuecomment-682013220
-  kubernetes_version: v1.17.11
+  kubernetes_version: v1.18.3
 runtime:
   cpus: 8
   memory: 16GB
