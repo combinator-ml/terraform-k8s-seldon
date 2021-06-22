@@ -1,5 +1,9 @@
 module "istio" {
-  source = "combinator-ml/istio/k8s"
+  source  = "combinator-ml/istio/k8s"
+  version = "0.0.1"
+  ingress_values = [
+    yamlencode(local.istio_ingress_values)
+  ]
 }
 
 data "kubectl_file_documents" "gateway_manifest" {
